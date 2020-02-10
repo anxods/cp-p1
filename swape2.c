@@ -10,6 +10,7 @@ separate mutex.*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include "options.h"
 
 struct buffer {
@@ -104,6 +105,7 @@ void start_threads(struct options opt){
 	struct args *args;
 	struct buffer buffer;
 	pthread_mutex_t mutex[opt.buffer_size];
+	clock_t t; 
 
 	srand(time(NULL));
 
@@ -136,6 +138,8 @@ void start_threads(struct options opt){
 	printf("Buffer before: "); 
 	print_buffer(buffer); printf("\n");
 
+	t = clock();
+
 	// Create num_thread threads running swap() 
 	for (i = 0; i < opt.num_threads; i++) {
 		threads[i].thread_num = i;
@@ -154,8 +158,9 @@ void start_threads(struct options opt){
 	
 	// Wait for the threads to finish
 	for (i = 0; i < opt.num_threads; i++)
-
 		pthread_join(threads[i].thread_id, NULL);
+
+	t = clock() - t;
 
 	// Print the buffer
 	printf("\n");
@@ -167,6 +172,10 @@ void start_threads(struct options opt){
 		printf("Correct buffer\n");
 	else
 		printf("Incorrect buffer\n");
+
+	printf("\n");
+	double time_taken = ((double)t)/CLOCKS_PER_SEC; 
+	printf("start_threads() took %f seconds to execute \n", time_taken); 
 
 	free(args);
 	free(threads);
